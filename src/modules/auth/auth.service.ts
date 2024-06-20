@@ -2,6 +2,8 @@ import {
   BadRequestException,
   GoneException,
   Injectable,
+  Logger,
+  LoggerService,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -127,11 +129,12 @@ export class AuthService {
       where: { email: data.email.value },
     });
     if (user) {
-      const newUser = await this.usersService.update(user.id, {
-        email: data.email.value,
-        name: data.name,
-        verified: data.email.verified,
-        photoURL: data.photoURL,
+      await this.usersService.update(user.id, {
+        verified: data.verified || true,
+        googleId: data.id,
+      });
+      const newUser = await this.usersService.findOne({
+        where: { id: user.id },
       });
       const payload: Payload = { sub: user.id };
       const { accessToken, refreshToken } =
@@ -142,11 +145,12 @@ export class AuthService {
         user: newUser,
       };
     } else {
-      const newUser = await this.usersService.createGoogle({
+      const newUser = await this.usersService.createThirdPart({
         email: data.email.value,
         name: data.name,
         photoURL: data.photoURL,
         verified: data.email.verified,
+        googleId: data.id,
       });
 
       const payload: Payload = { sub: newUser.id };
@@ -213,5 +217,44 @@ export class AuthService {
       throw new UnauthorizedException("There's no user with that token");
     const payload: Payload = { sub };
     return await this.generateAccessAndRefreshToken(payload);
+  }
+  /**
+   *
+   * @param data - the github callback data
+   * @returns
+   */
+  async githubRedirect(data) {
+    const user = await this.usersService.findOne({
+      where: { email: data.email },
+    });
+    if (user) {
+      await this.usersService.update(user.id, {
+        githubId: data.githubId,
+        verified: true,
+      });
+      const newUser = await this.usersService.findOne({
+        where: { id: user.id },
+      });
+      const payload: Payload = { sub: newUser.id };
+      const { accessToken, refreshToken } =
+        await this.generateAccessAndRefreshToken(payload);
+      return {
+        accessToken,
+        refreshToken,
+        user: newUser,
+      };
+    } else {
+      const newUser = await this.usersService.createThirdPart(data);
+      const payload: Payload = {
+        sub: newUser.id,
+      };
+      const { accessToken, refreshToken } =
+        await this.generateAccessAndRefreshToken(payload);
+      return {
+        accessToken,
+        refreshToken,
+        user: newUser,
+      };
+    }
   }
 }

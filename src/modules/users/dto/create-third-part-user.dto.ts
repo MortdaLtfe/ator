@@ -11,4 +11,8 @@ export class CreateThirdPartUserDto {
   email: string;
   @IsBoolean()
   verified: boolean;
+
+  googleId?: string | number;
+
+  githubId?: string | number;
 }

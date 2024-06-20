@@ -14,11 +14,14 @@ export class User {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
-  @Column({ type: 'varchar', default: '', nullable: true })
+  @Column({ type: 'varchar', default: '' })
   photoURL?: string;
 
   @Column({ type: 'bool', default: false })
   verified: boolean;
-  @Column({ type: 'bool', default: false })
-  twoFactorAuth: boolean;
+  @Column({ type: 'varchar', nullable: true })
+  googleId: string | number;
+
+  @Column({ type: 'varchar', nullable: true })
+  githubId: string | number;
 }

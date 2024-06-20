@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { CreateThirdPartUserDto } from './dto/create-third-pat-user.dto';
+import { CreateThirdPartUserDto } from './dto/create-third-part-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateThirdPartUserDto } from './dto/update-google-user.dto';
+import { UpdateThirdPartUserDto } from './dto/update-third-part-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -45,7 +45,9 @@ export class UsersService {
    * @returns {User}
    * @description method for creating Thrid-Part User using Google
    */
-  createGoogle(createThidrdPartUserDto: CreateThirdPartUserDto): Promise<User> {
+  createThirdPart(
+    createThidrdPartUserDto: CreateThirdPartUserDto,
+  ): Promise<User> {
     return this.usersRepository.save(createThidrdPartUserDto);
   }
   /**

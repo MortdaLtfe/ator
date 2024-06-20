@@ -2,8 +2,9 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { GoogleGuard } from './guards/google.guards';
+import { GoogleGuard } from './guards/google.guard';
 import { User } from '@decorators/user.decorator';
+import { GithubGuard } from './guards/github.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -39,5 +40,15 @@ export class AuthController {
   @Post('refresh-token')
   refreshTokens(@Body('refresh_token') refreshToken) {
     return this.authService.refreshToken(refreshToken);
+  }
+
+  @Get('github')
+  @UseGuards(GithubGuard)
+  github() {}
+
+  @Get('github/redirect')
+  @UseGuards(GithubGuard)
+  githubRedirect(@User() user) {
+    return this.authService.githubRedirect(user);
   }
 }
