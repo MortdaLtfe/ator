@@ -16,7 +16,7 @@ Ator is Authentication API provides the very basic authentication logic.
 4. **Email Sender**
    - Service to send emails for various purposes such as verification and password reset (coming soon).
 
-5. **Local & Google & GitHub Login (Coming Soon)**
+5. **Local & Google & GitHub Login**
    - Support for local login, Google login, and GitHub login.
 
 6. **User Verification**
@@ -50,6 +50,9 @@ WEBSITE_URL=http://
 
 GOOGLE_SECRET_ID=
 GOOGLE_CLIENT_ID=
+
+GITHUB_CLIENT_ID=
+GITHUB_SECRET_ID=
 
 MAIL_HOST=smtp.office365.com
 MAIL_PORT=587
