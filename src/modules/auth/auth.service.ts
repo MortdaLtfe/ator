@@ -2,6 +2,7 @@ import {
   BadRequestException,
   GoneException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   LoggerService,
   NotFoundException,
@@ -19,9 +20,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailerService } from '../mailer/mailer.service';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
-import { verifyEmailTemplate } from '../../shared/templates/verifyEmail';
+import { successfulyVerificationTemplate } from '../../shared/templates/successfulyVerificationEmail';
 import { User } from '../users/entities/user.entity';
 import { Payload } from '@interfaces/payload.interface';
+import { PasswordToken } from './entities/password-token.entity';
+import { restPasswordTemplate } from '@templates/restPassword';
+import { successfulyRestPasswordTemplate } from '@templates/successfulyRestPassword';
 @Injectable()
 export class AuthService {
   constructor(
@@ -31,6 +35,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
+    @InjectRepository(PasswordToken)
+    private readonly passwordTokenRepository: Repository<PasswordToken>,
   ) {}
   /**
    * @param createUserDto
@@ -113,7 +119,7 @@ export class AuthService {
         throw new BadRequestException('Your Email already Verified');
       await this.usersService.update(emailToken.userId, { verified: true });
       await this.emailTokenRepository.delete(emailToken.userId);
-      return verifyEmailTemplate;
+      return successfulyVerificationTemplate;
     } catch (error) {
       throw new NotFoundException("There's no Email with that token");
     }
@@ -170,8 +176,8 @@ export class AuthService {
    * @returns {EmailToken}
    * @description method for creating email token
    */
-  createEmailToken(user: User) {
-    const token = crypto.randomBytes(32).toString('hex');
+  createEmailToken(user: User): Promise<EmailToken> {
+    const token = crypto.randomBytes(10).toString('hex');
     const createdAt = Date.now();
     const expiresAt = Date.now() * 1000 * 3600;
     return this.emailTokenRepository.save({
@@ -256,5 +262,49 @@ export class AuthService {
         user: newUser,
       };
     }
+  }
+
+  async createPasswordToken(userId: number | string) {
+    const isThereToken = await this.passwordTokenRepository.findOne({
+      where: { userId },
+    });
+    if (isThereToken) await this.passwordTokenRepository.delete(userId);
+    const user = await this.usersService.findOne({ where: { id: userId } });
+
+    const newToken = crypto.randomBytes(10).toString('hex');
+    console.log(user, newToken);
+    const passwordToken = await this.passwordTokenRepository.save({
+      userId,
+      token: newToken,
+      expiresIn: Date.now() * 500 * 3600,
+    });
+    await this.mailerService.sendRestPassword(
+      user.email,
+      user.name,
+      `${this.configService.get('WEBSITE_URL')}/api/v1/auth/rest-password?token=${newToken}`,
+    );
+    return {
+      message: 'please check your email box',
+      token: passwordToken.token,
+    };
+  }
+  async showRestPasswordTemplate(token: string) {
+    const restPasswordToken = await this.passwordTokenRepository.findOne({
+      where: { token },
+    });
+    if (Date.now() > restPasswordToken.expiresIn)
+      throw new BadRequestException('Token has been expires');
+    if (!restPasswordToken) {
+      throw new BadRequestException('There is no user with this token');
+    }
+    return restPasswordTemplate;
+  }
+
+  async changePassword(password: string, token: string) {
+    const { userId } = await this.passwordTokenRepository.findOne({
+      where: { token },
+    });
+    await this.usersService.update(+userId, { password });
+    return successfulyRestPasswordTemplate;
   }
 }

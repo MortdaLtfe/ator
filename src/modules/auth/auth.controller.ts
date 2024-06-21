@@ -1,10 +1,19 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { GoogleGuard } from './guards/google.guard';
 import { User } from '@decorators/user.decorator';
 import { GithubGuard } from './guards/github.guard';
+import { JwtGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,9 +32,11 @@ export class AuthController {
   verifyToken(@Param('token') token) {
     return this.authService.verifyToken(token);
   }
-  @Get(':userId/send')
-  sendToken(@Param('userId') userId) {
-    return this.authService.sendToken(userId);
+
+  @Post('send-verifiaction')
+  @UseGuards(JwtGuard)
+  sendToken(@User() user) {
+    return this.authService.sendToken(user.id);
   }
 
   @Get('google')
@@ -50,5 +61,19 @@ export class AuthController {
   @UseGuards(GithubGuard)
   githubRedirect(@User() user) {
     return this.authService.githubRedirect(user);
+  }
+
+  @Post('send-rest-password')
+  @UseGuards(JwtGuard)
+  restPassword(@User() user) {
+    return this.authService.createPasswordToken(user.sub);
+  }
+  @Get('rest-password')
+  getRestPassword(@Query('token') token) {
+    return this.authService.showRestPasswordTemplate(token);
+  }
+  @Post('rest-password')
+  postRestPassword(@Body('password') password, @Query('token') token) {
+    return this.authService.changePassword(password, token);
   }
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService as EmailerService } from '@nestjs-modules/mailer';
-import { successfulyVerificationTemplate } from '@templates/successfulyVerification';
+import { verifyEmailTemplate } from '@templates/verifyEmail';
 import { ConfigService } from '@nestjs/config';
+import { restPasswordEmailTemplate } from '@templates/restPasswordEmail';
 @Injectable()
 export class MailerService {
   constructor(
@@ -20,7 +21,16 @@ export class MailerService {
       to,
       subject: 'Verify Your Email Address',
       from: this.configService.get('MAIL_USER'),
-      html: successfulyVerificationTemplate(url),
+      html: verifyEmailTemplate(url),
+    });
+  }
+
+  async sendRestPassword(to: string, name, url: string) {
+    return this.emailerService.sendMail({
+      subject: 'Rest Your Password',
+      to,
+      from: this.configService.get('MAIL_USER'),
+      html: restPasswordEmailTemplate(name, url),
     });
   }
 }

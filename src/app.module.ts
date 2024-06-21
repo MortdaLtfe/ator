@@ -6,6 +6,7 @@ import { User } from './modules/users/entities/user.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { EmailToken } from './modules/auth/entities/email-token.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PasswordToken } from './modules/auth/entities/password-token.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: 'config.env', isGlobal: true }),
@@ -16,7 +17,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       password: process.env.DATABASE_PASSWORD,
       port: +process.env.DATABASE_PORT,
       synchronize: true,
-      entities: [User, EmailToken],
+      entities: [User, EmailToken, PasswordToken],
     }),
     UsersModule,
     AuthModule,

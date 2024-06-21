@@ -1,3 +1,4 @@
+import { Payload } from '@interfaces/payload.interface';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
@@ -14,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: configService.get('ACCESS_TOKEN_SECRET'),
     });
   }
-  async validate(payload) {
+  async validate(payload: Payload) {
     const user = await this.usersService.findOne({
       where: { id: payload.sub },
     });

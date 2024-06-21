@@ -10,10 +10,11 @@ import { EmailToken } from './entities/email-token.entity';
 import { MailerModule } from '../mailer/mailer.module';
 import { GoogleStrategy } from './strategy/google.strategy';
 import { GithubStrategy } from './strategy/github.strategy';
+import { PasswordToken } from './entities/password-token.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([EmailToken]),
+    TypeOrmModule.forFeature([EmailToken, PasswordToken]),
     forwardRef(() => UsersModule),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({

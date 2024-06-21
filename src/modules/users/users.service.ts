@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -57,10 +57,13 @@ export class UsersService {
    */
   async update(
     id: number,
-    updateUserDto: UpdateUserDto | UpdateThirdPartUserDto,
-  ): Promise<User> {
-    if (!(await this.findOne({ where: { id } }))) throw new NotFoundException();
-    return this.usersRepository.save({ id, ...updateUserDto });
+    updateUserDto: UpdateUserDto & UpdateThirdPartUserDto,
+  ): Promise<UpdateResult> {
+    if (updateUserDto.password) {
+      const salt = await bcrypt.genSalt(13);
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+    }
+    return this.usersRepository.update(id, updateUserDto);
   }
   /**
    * @param id - User ID
