@@ -14,8 +14,7 @@ Ator is Authentication API provides the very basic authentication logic.
    - Handling of refresh and access tokens for session management.
 
 4. **Email Sender**
-   - Service to send emails for various purposes such as verification and password reset (coming soon).
-
+   - Service to send emails for various purposes such as verification and password reset.
 5. **Local & Google & GitHub Login**
    - Support for local login, Google login, and GitHub login.
 
