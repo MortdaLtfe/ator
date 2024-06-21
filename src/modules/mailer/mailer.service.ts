@@ -25,6 +25,13 @@ export class MailerService {
     });
   }
 
+  /**
+   *
+   * @param to - which is the email
+   * @param name - the user name
+   * @param url - the link to the Rest Password
+   * @description method for send an rest password email
+   */
   async sendRestPassword(to: string, name, url: string) {
     return this.emailerService.sendMail({
       subject: 'Rest Your Password',

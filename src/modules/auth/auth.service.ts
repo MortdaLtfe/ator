@@ -264,6 +264,12 @@ export class AuthService {
     }
   }
 
+  /**
+   *
+   * @param userId - the user id
+   * @returns message with token
+   * @description method for creating Password Token to rest password
+   */
   async createPasswordToken(userId: number | string) {
     const isThereToken = await this.passwordTokenRepository.findOne({
       where: { userId },
@@ -288,6 +294,12 @@ export class AuthService {
       token: passwordToken.token,
     };
   }
+  /**
+   *
+   * @param token - the user's password token
+   * @returns html template
+   * @description method for render rest password template
+   */
   async showRestPasswordTemplate(token: string) {
     const restPasswordToken = await this.passwordTokenRepository.findOne({
       where: { token },
@@ -299,7 +311,13 @@ export class AuthService {
     }
     return restPasswordTemplate;
   }
-
+  /**
+   *
+   * @param password - the new password
+   * @param token - the user's password token
+   * @returns render successfuly message
+   * @description method to change the user's password and render the successfuly change password template
+   */
   async changePassword(password: string, token: string) {
     const { userId } = await this.passwordTokenRepository.findOne({
       where: { token },
